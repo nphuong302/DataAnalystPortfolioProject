@@ -166,12 +166,14 @@ From PopvsVac
 
 -- Using Temp Table to perform Calculation on Partition By in previous query
 
-IF OBJECT_ID(#PercentPopulationVaccinated) IS NOT NULL
-    DROP TABLE #PercentPopulationVaccinated;
 
 IF OBJECT_ID('#PercentPopulationVaccinated', 'U') IS NOT NULL
- DROP TABLE #PercentPopulationVaccinated;
- GO
+DROP TABLE #PercentPopulationVaccinated; -- This is use for SQL Server < 2016
+GO
+
+-- This is applicable SQL Server 2016
+-- DROP Table if exists #PercentPopulationVaccinated
+
 Create Table #PercentPopulationVaccinated
 (
 Continent nvarchar(255),
