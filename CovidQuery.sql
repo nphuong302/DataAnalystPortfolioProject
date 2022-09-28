@@ -1,3 +1,5 @@
+SELECT @@VERSION
+
 select * 
 from DataAnalystPortfolioProject..CovidDeaths_v02$
 where continent is not null
@@ -167,9 +169,7 @@ From PopvsVac
 -- Using Temp Table to perform Calculation on Partition By in previous query
 
 
-IF OBJECT_ID('#PercentPopulationVaccinated', 'U') IS NOT NULL
-DROP TABLE #PercentPopulationVaccinated; -- This is use for SQL Server < 2016
-GO
+Drop Table #PercentPopulationVaccinated; -- This is use for SQL Server < 2016
 
 -- This is applicable SQL Server 2016
 -- DROP Table if exists #PercentPopulationVaccinated
@@ -196,6 +196,17 @@ join DataAnalystPortfolioProject..CovidVaccinations_v02$ vac
 Select *, (PeopleVaccinated/Population)*100 as VaccinatedPerPopulation
 From #PercentPopulationVaccinated
 
-SELECT @@VERSION
 
+-- Creating View to store data for later visualizations
 
+Create View PercentPopulationVaccinated as
+Select dea.continent, dea.location, dea.date, dea.population, vac.new_vaccinations,
+ SUM(CONVERT(bigint,vac.new_vaccinations)) OVER (Partition by dea.Location Order by dea.location, dea.Date) as PeopleVaccinated
+From DataAnalystPortfolioProject..CovidDeaths_v02$ dea
+Join DataAnalystPortfolioProject..CovidVaccinations_v02$ vac
+	On dea.location = vac.location
+	And dea.date = vac.date
+Where dea.continent is not null 
+
+Select * 
+From PercentPopulationVaccinated
